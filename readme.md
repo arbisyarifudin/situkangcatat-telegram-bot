@@ -18,11 +18,7 @@ Telegram bot untuk mencatat presensi kehadiran dan laporan harian (daily report)
 TELEGRAM_BOT_TOKEN=
 ```
 
-## Cara Jalankan
-1. Buka terminal dan masuk ke direktori repository
-2. Jalankan `yarn dev` atau `npm run dev` untuk menjalankan bot dalam mode development atau `yarn start` atau `npm run start` untuk menjalankan bot dalam mode production
-
-## Cara Buat Bot Telegram dan Mendapatkan Token
+## Cara Membuat Bot Telegram dan Mendapatkan Token
 1. Buka Telegram
 2. Cari bot dengan username `@botfather`
 3. Ketik `/newbot` dan ikuti petunjuknya
@@ -40,3 +36,7 @@ TELEGRAM_BOT_TOKEN=
 2. Buka grup yang ingin ditambahkan bot
 3. Lihat URL di browser, salin angka setelah Grup ID (contoh: `https://web.telegram.org/a/#-1812257489_123`). ID topic adalah angka tersebut (contoh: `123`)
 4. Buka file `databases/groups.json` dan tambahkan ID topic tersebut ke dalam array `topics` pada grup yang bersangkutan
+
+## Cara Jalankan Bot
+1. Buka terminal dan masuk ke direktori repository
+2. Jalankan `yarn dev` atau `npm run dev` untuk menjalankan bot dalam mode development atau `yarn start` atau `npm run start` untuk menjalankan bot dalam mode production
