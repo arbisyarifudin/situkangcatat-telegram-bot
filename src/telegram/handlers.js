@@ -1,8 +1,9 @@
-require('moment-timezone')
 const moment = require('moment')
+require('moment-timezone')
 
 const { downloadPhoto, isValidReportFormat, __handleCommand, listSupportedCommandText, invalidParamsText } = require('./helpers')
 const { saveToCSV } = require('./helpers')
+const supportedCommands = require('../../databases/commands.json')
 
 module.exports = {
   attendanceHandler: async (bot, msg) => {
@@ -13,15 +14,16 @@ module.exports = {
 
     let msgText
     if (msg.text) {
-      msgText = msg.text.toLowerCase()
+      msgText = msg.text
     } else {
-      msgText = msg.caption ? msg.caption.toLowerCase() : ''
+      msgText = msg.caption ? msg.caption : ''
     }
 
     if (msgText) {
       const validKeywords = ['masuk', 'pulang', 'izin', 'sakit', 'cuti']
+      const messageTextLowerCase = msgText.toLowerCase()
 
-      if (validKeywords.some(keyword => msgText.includes(keyword))) {
+      if (validKeywords.some(keyword => messageTextLowerCase.includes(keyword))) {
         if (msg.photo && msg.photo.length > 0) {
           // Jika terdapat foto dalam pesan
           const photoId = msg.photo[msg.photo.length - 1].file_id
@@ -34,7 +36,7 @@ module.exports = {
             //   console.log('photoPath', photoPath)
 
             // Ambil status dari pesan
-            const status = msgText.includes('izin') ? 'Izin' : msgText.includes('sakit') ? 'Sakit' : msgText.includes('cuti') ? 'Cuti' : msgText.includes('masuk') ? 'Masuk' : 'Pulang'
+            const status = messageTextLowerCase.includes('izin') ? 'Izin' : messageTextLowerCase.includes('sakit') ? 'Sakit' : messageTextLowerCase.includes('cuti') ? 'Cuti' : messageTextLowerCase.includes('masuk') ? 'Masuk' : 'Pulang'
 
             // Ambil tanggal dan waktu dari pesan
             const dateObj = new Date(msg.date * 1000)
@@ -49,9 +51,11 @@ module.exports = {
             // Ambil username dari pesan
             const username = `@${msg.from.username}`
 
+            const note = ''
+
             // Ambil informasi dari msg untuk dimasukkan ke dalam file CSV
             //   const rowData = [msg.from.username, status, dateString, photUrl]
-            const rowData = [username, status, msgText, dateTimeString]
+            const rowData = [username, status, note, dateTimeString, msgText]
 
             const dateFileName = date.format('YYYY-MM-DD') // format: YYYY-MM-DD
             saveToCSV([rowData], `datas/attendance-${dateFileName}.csv`)
@@ -74,11 +78,44 @@ module.exports = {
           })
         }
       } else {
-        // Kirim pesan error jika format kata kunci salah
-        bot.sendMessage(chatId, `<b>Ups!</b> Format kata kunci salah.\n\nGunakan: <code>${validKeywords.join(', ')}</code>`, {
-          parse_mode: 'HTML',
-          reply_to_message_id: messageId
-        })
+        // if (msgText.includes('/presensi')) {
+        //   // cari command yang sesuai
+        //   const selectedCommand = supportedCommands.find((cmd) => cmd.command === '/presensi')
+        //   if (!selectedCommand) return
+
+        //   const splitedText = msgText.split(' ')
+        //   //   const command = splitedText[0] // Mengambil perintah (misal: /presensi)
+        //   const args = splitedText.length > 1 ? splitedText.slice(1) : [] // Mengambil argumen setelah perintah
+        //   const user = msg.from // Mengambil informasi pengirim pesan
+
+        //   // Memeriksa apakah jumlah argumen sesuai
+        //   if (args.length < selectedCommand.params.filter((param) => param.is_required).length) {
+        //     bot.sendMessage(
+        //       chatId, invalidParamsText(selectedCommand), {
+        //         parse_mode: 'MarkdownV2'
+        //       }
+        //     )
+        //   } else {
+        //     // Eksekusi perintah
+        //     __handleCommand(bot, msg, selectedCommand, args, user, chatId)
+        //   }
+        // } else {
+        //   // Kirim pesan error jika format kata kunci salah
+        //   bot.sendMessage(chatId, `<b>Ups!</b> Format kata kunci salah.\n\nGunakan: <code>${validKeywords.join(', ')}</code>`, {
+        //     parse_mode: 'HTML',
+        //     reply_to_message_id: messageId
+        //   })
+        // }
+
+        if (msgText && !msgText.startsWith('/')) {
+          // Kirim pesan error jika format kata kunci salah
+          const invalidKeywordText = `<b>Ups!</b> Format kata kunci salah.\n\nGunakan: <code>${validKeywords.join(', ')}</code>\n\nAtau gunakan perintah <code>/presensi</code> untuk mencatat presensi.`
+
+          bot.sendMessage(chatId, invalidKeywordText, {
+            parse_mode: 'HTML',
+            reply_to_message_id: messageId
+          })
+        }
       }
     } else {
       // Kirim pesan error jika tidak ada teks
@@ -164,33 +201,41 @@ Todo/Yang akan di kerjakan hari ini :
     }
   },
   commandHandler: (bot, msg) => {
-    console.log('commandHandler msg', msg)
+    // console.log('commandHandler msg', msg)
+
+    let msgText
+    if (msg.text) {
+      msgText = msg.text
+    } else {
+      msgText = msg.caption ? msg.caption : ''
+    }
 
     const chatId = msg.chat.id
-    const splitedText = msg.text.split(' ')
+    const splitedText = msgText.split(' ')
     const command = splitedText[0] // Mengambil perintah (misal: /presensi)
     const args = splitedText.length > 1 ? splitedText.slice(1) : [] // Mengambil argumen setelah perintah
     const user = msg.from // Mengambil informasi pengirim pesan
 
     // Mencari perintah yang sesuai
-    const supportedCommands = require('../../databases/commands.json')
     const selectedCommand = supportedCommands.find((cmd) => cmd.command === command)
 
     if (selectedCommand) {
       // Memeriksa apakah jumlah argumen sesuai
       if (args.length < selectedCommand.params.filter((param) => param.is_required).length) {
-        bot.sendMessage(
+        return bot.sendMessage(
           chatId, invalidParamsText(selectedCommand), {
-            parse_mode: 'MarkdownV2'
+            parse_mode: 'MarkdownV2',
+            reply_to_message_id: msg.message_id
           }
         )
       } else {
         // Eksekusi perintah
-        __handleCommand(bot, selectedCommand, args, user, chatId)
+        return __handleCommand(bot, msg, selectedCommand, args, user, chatId)
       }
     } else {
-      bot.sendMessage(chatId, listSupportedCommandText(supportedCommands), {
-        parse_mode: 'MarkdownV2'
+      return bot.sendMessage(chatId, listSupportedCommandText(supportedCommands), {
+        parse_mode: 'MarkdownV2',
+        reply_to_message_id: msg.message_id
       })
     }
   }

@@ -1,10 +1,79 @@
 const fs = require('fs')
 const https = require('https')
 
-require('moment-timezone')
 const moment = require('moment')
+require('moment-timezone')
 
-const headerTitles = ['Nama', 'Status', 'Pesan', 'Tanggal']
+const headerTitles = ['Nama', 'Status', 'Keterangan', 'Tanggal', 'Pesan']
+
+const saveToCSV = (data, fileName, folder = 'datas') => {
+  // Membuat direktori jika belum ada
+  if (!fs.existsSync(folder)) {
+    fs.mkdirSync(folder, { recursive: true })
+  }
+
+  // Membuat file CSV baru jika belum ada
+  if (!fs.existsSync(fileName)) {
+    fs.writeFileSync(fileName, headerTitles.join(',') + '\n', 'utf-8')
+  }
+
+  // Mengonversi data presensi ke dalam baris-baris CSV
+  const rows = data.map(row => {
+    return row.join(',')
+  })
+
+  // Menggabungkan baris-baris data dengan file CSV yang sudah ada
+  fs.appendFileSync(fileName, rows.join('\n') + '\n', 'utf-8')
+
+  //   console.log(`Data presensi telah ditambahkan ke dalam file ${fileName}`)
+}
+
+const saveAttendanceToJSONFile = (msg, { status, note }) => {
+  // current date (format: YYYY-MM-DD)
+  const date = moment().tz('Asia/Jakarta')
+  const currentDate = date.format('YYYY-MM-DD')
+  const dateTimeString = date.format('YYYY-MM-DD HH:mm:ss')
+
+  // Ambil semua data logs
+  const logs = require('../../databases/logs.json')
+
+  //   console.log('logs', logs)
+
+  // temukan log yang sesuai dengan tanggal
+  let log = logs.find(log => log.date === currentDate)
+  if (!log) {
+    // Jika log tidak ditemukan, maka buat log baru
+    logs.push({
+      date: currentDate,
+      attendances: []
+    })
+
+    // temukan log yang sesuai dengan tanggal
+    log = logs.find(log => log.date === currentDate)
+  }
+
+  const logAttendances = log.attendances
+
+  // tambahkan data presensi ke dalam log
+  logAttendances.push({
+    message_id: msg.message_id,
+    member_id: msg.from.id,
+    status: status.toLowerCase(),
+    note,
+    created_at: dateTimeString,
+    time: date.format('HH:mm:ss'),
+    timezone: 'Asia/Jakarta'
+  })
+
+  // Simpan log ke dalam database/logs.json
+
+  // Membuat direktori jika belum ada
+  if (!fs.existsSync('databases')) {
+    fs.mkdirSync('databases', { recursive: true })
+  }
+
+  fs.writeFileSync('databases/logs.json', JSON.stringify(logs, null, 2), 'utf-8')
+}
 
 // Helper: teks yang akan dikirimkan jika format pesan tidak sesuai
 // berisi daftar command dan parameter yang didukung serta penjelasan / description nya
@@ -50,8 +119,8 @@ const invalidParamsText = (command) => {
     .replace(/-/g, '\\-')
     .replace(/\(/g, '\\(')
     .replace(/\)/g, '\\)')
-  // .replace(/</g, '[')
-  // .replace(/>/g, ']')
+    // .replace(/</g, '[')
+    // .replace(/>/g, ']')
 
   //   console.log('invalidParamsText', escapedText)
 
@@ -60,27 +129,6 @@ const invalidParamsText = (command) => {
 
 module.exports = {
 
-  saveToCSV: (data, fileName, folder = 'datas') => {
-    // Membuat direktori jika belum ada
-    if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder, { recursive: true })
-    }
-
-    // Membuat file CSV baru jika belum ada
-    if (!fs.existsSync(fileName)) {
-      fs.writeFileSync(fileName, headerTitles.join(',') + '\n', 'utf-8')
-    }
-
-    // Mengonversi data presensi ke dalam baris-baris CSV
-    const rows = data.map(row => {
-      return row.join(',')
-    })
-
-    // Menggabungkan baris-baris data dengan file CSV yang sudah ada
-    fs.appendFileSync(fileName, rows.join('\n') + '\n', 'utf-8')
-
-    //   console.log(`Data presensi telah ditambahkan ke dalam file ${fileName}`)
-  },
   // Fungsi untuk mengunduh foto dari pesan
   downloadPhoto: (bot, fileId) => {
     return new Promise((resolve, reject) => {
@@ -198,33 +246,111 @@ module.exports = {
   },
 
   // Helper: Fungsi untuk menangani perintah / command yang diterima
-  __handleCommand: (bot, command, args, user, chatId) => {
+  __handleCommand: (bot, msg, command, args, user, chatId) => {
     const commandName = command.command
     const supportedCommands = require('../../databases/commands.json')
 
-    switch (commandName) {
-      case '/presensi':
-        // const jenis = args[0]
-        // const keterangan = args.slice(1).join(' ') // Menggabungkan argumen setelah jenis menjadi satu string
-        // Lakukan sesuatu dengan perintah presensi, misalnya catat di database
-        // Contoh respons:
-        // bot.sendMessage(chatId, `Presensi berhasil dicatat: Jenis: ${jenis}, Keterangan: ${keterangan}`)
-        break
+    if (commandName === '/presensi') {
+      const jenis = args[0] // Mengambil argumen pertama
+      const keterangan = args.slice(1).join(' ') // Menggabungkan argumen setelah jenis menjadi satu string
 
-      case '/laporan-presensi':
-        // const tahun = args[0]
-        // const bulan = args[1]
-        // Lakukan sesuatu untuk menghasilkan laporan presensi berdasarkan tahun dan bulan
-        // Contoh respons:
-        // bot.sendMessage(chatId, `Menampilkan laporan presensi untuk tahun ${tahun} bulan ${bulan}`)
-        break
+      // Lakukan sesuatu untuk mencatat presensi
 
-      default:
-        // bot.sendMessage(chatId, 'Perintah tidak dikenali.')
-        bot.sendMessage(chatId, listSupportedCommandText(supportedCommands), {
-          parse_mode: 'MarkdownV2'
+      // Ambil Jenis yang didukung dari param.values
+      const supportedJenis = command.params.find(param => param.name.toLowerCase() === 'jenis').values // ['hadir', 'izin', 'sakit', 'cuti', 'alpha']
+
+      // Cek apakah jenis yang dimasukkan sesuai dengan yang didukung
+      if (!supportedJenis.includes(jenis)) {
+        bot.sendMessage(chatId, `Jenis presensi tidak valid. Jenis yang didukung: ${supportedJenis.join(', ')}`, {
+          reply_to_message_id: msg.message_id
         })
-        break
+        return
+      }
+
+      // Cek apakah keterangan tidak kosong jika jenis presensi adalah izin, sakit, atau cuti
+      if (['izin', 'sakit', 'cuti'].includes(jenis) && !keterangan) {
+        bot.sendMessage(chatId, `Keterangan tidak boleh kosong untuk jenis presensi: ${jenis}`, {
+          reply_to_message_id: msg.message_id
+        })
+        return
+      }
+
+      // Cek apakah ada foto yang dikirimkan
+      if (!msg.photo || !msg.photo?.length) {
+        bot.sendMessage(chatId, 'Presensi membutuhkan foto.', {
+          reply_to_message_id: msg.message_id
+        })
+        return
+      }
+
+      //   console.log('args', args)
+      //   console.log('jenis', jenis)
+
+      // Simpan data presensi ke dalam file CSV
+
+      // Ambil status dari pesan dengan ucfirst
+      const status = jenis.charAt(0).toUpperCase() + jenis.slice(1)
+
+      // Ambil tanggal dan waktu dari pesan
+      const dateObj = new Date(msg.date * 1000)
+      const date = moment(dateObj).tz('Asia/Jakarta') // Menggunakan zona waktu Asia/Jakarta
+
+      // Format tanggal dan waktu menjadi string
+      const dateTimeString = date.format('YYYY-MM-DD HH:mm:ss')
+      const dayName = date.format('dddd') // Nama hari dalam bahasa Indonesia
+
+      //   const photUrl = `${baseURL}/${photoPath}`
+
+      // Ambil username dari pesan
+      const username = `@${msg.from.username}`
+
+      // Ambil keterangan dari pesan
+      const note = keterangan || ''
+
+      // Ambil pesan utuh
+      let messageRaw
+      if (msg.text) {
+        messageRaw = msg.text
+      } else {
+        messageRaw = msg.caption ? msg.caption : ''
+      }
+
+      // Ambil informasi dari msg untuk dimasukkan ke dalam file CSV
+      //   const rowData = [msg.from.username, status, dateString, photUrl]
+      const rowData = [username, status, note, dateTimeString, messageRaw]
+
+      const dateFileName = date.format('YYYY-MM-DD') // format: YYYY-MM-DD
+      saveToCSV([rowData], `datas/attendance-${dateFileName}.csv`)
+
+      // Simpan ke dalam database/logs.json
+      saveAttendanceToJSONFile(msg, {
+        status,
+        note
+      })
+
+      // Kirim pesan sukses
+
+      const successMessageText = `<b>Sip!</b> Kehadiran berhasil dicatat.\n\n<code>Username: ${username}\nStatus: ${status}\nTimestamp: ${dayName}, ${dateTimeString} WIB</code>`
+
+      // Kirim pesan sukses
+      bot.sendMessage(chatId, successMessageText, {
+        parse_mode: 'HTML',
+        reply_to_message_id: msg.message_id
+      })
+    } else if (commandName === '/laporanpresensi') {
+      const tahun = args[0]
+      const bulan = args[1]
+      // Lakukan sesuatu untuk menghasilkan laporan presensi berdasarkan tahun dan bulan
+      // Contoh respons:
+      bot.sendMessage(chatId, `Menampilkan laporan presensi untuk tahun ${tahun} bulan ${bulan}`, {
+        reply_to_message_id: msg.message_id
+      })
+    } else {
+      // bot.sendMessage(chatId, 'Perintah tidak dikenali.')
+      bot.sendMessage(chatId, listSupportedCommandText(supportedCommands), {
+        parse_mode: 'MarkdownV2',
+        reply_to_message_id: msg.message_id
+      })
     }
   },
 

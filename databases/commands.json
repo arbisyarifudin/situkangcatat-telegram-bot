@@ -7,7 +7,15 @@
                 "name": "JENIS",
                 "type": "string",
                 "is_required": true,
-                "description": "Jenis presensi: masuk, keluar, izin, sakit, cuti, alpha"
+                "description": "Jenis presensi: masuk, keluar, izin, sakit, cuti, alpha",
+                "values": [
+                    "masuk",
+                    "keluar",
+                    "izin",
+                    "sakit",
+                    "cuti",
+                    "alpha"
+                ]
             },
             {
                 "name": "KETERANGAN",

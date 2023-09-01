@@ -7,10 +7,11 @@ module.exports = {
   init: (bot) => {
     // Message event listener
     bot.on('message', async (msg) => {
+    //   console.log('on message')
       //   console.log('message', msg)
 
       const chatId = msg.chat.id
-      const topicId = msg.message_topic_id
+      const topicId = msg.message_thread_id
       const isBot = msg.from.is_bot
 
       // Cek apakah pesan masuk dari grup yang diizinkan
@@ -40,25 +41,28 @@ module.exports = {
 
         if (!topicData) return
 
+        const messageText = msg.text ? msg.text : msg.caption ? msg.caption : ''
+
         // handle type
-        if (topicData.type === 'attendance') {
-          attendanceHandler(bot, msg)
+        if (topicData.type === 'attendance' && !messageText.startsWith('/')) {
+          return attendanceHandler(bot, msg)
         } else if (topicData.type === 'daily_report') {
-          dailyReportHandler(bot, msg)
+          return dailyReportHandler(bot, msg)
         } else {
           // check apakah pesan memiliki awalan "/" atau tidak, misal "/presensi" atau "/laporan-presensi"
-          if (msg.text && msg.text.startsWith('/')) {
-            console.log('text starts with "/"')
-            // commandHandler(bot, msg)
+          if (messageText && messageText.startsWith('/')) {
+            // console.log('text starts with "/"')
+            return commandHandler(bot, msg)
           }
         }
       }
     })
 
     // Menangani pesan yang mengandung perintah
-    bot.onText(/\/\w+/, (msg) => {
-      console.log('receive text with "/"', msg.text)
-      commandHandler(bot, msg)
-    })
+    // bot.onText(/\/\w+/, (msg) => {
+    // //   console.log('receive text with "/"', msg.text)
+    //   console.log('onText')
+    //   commandHandler(bot, msg)
+    // })
   }
 }
