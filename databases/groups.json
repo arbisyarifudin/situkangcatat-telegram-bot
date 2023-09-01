@@ -1,0 +1,58 @@
+[
+    {
+        "id": -1001812257489,
+        "name": "PDN",
+        "topics": [
+            {
+                "id": 23,
+                "type": "attendance"
+            },
+            {
+                "id": 107,
+                "type": "daily_report"
+            }
+        ],
+        "members": [
+            {
+                "id": 208432445,
+                "is_bot": false,
+                "first_name": "Ano",
+                "last_name": "Syarifudin",
+                "username": "arbisyarifudin"
+            },
+            {
+                "id": 1398045704,
+                "is_bot": false,
+                "first_name": "A",
+                "last_name": "",
+                "username": null
+            }
+        ]
+    },
+    {
+        "id": -1001715907572,
+        "name": "RM",
+        "topics": [
+            {
+                "id": 865,
+                "type": "daily_report"
+            }
+        ],
+        "members": [
+            {
+                "id": 471496320,
+                "is_bot": false,
+                "first_name": "F",
+                "last_name": "",
+                "username": null
+            },
+            {
+                "id": 1359773466,
+                "is_bot": false,
+                "first_name": "C",
+                "last_name": "",
+                "username": null
+            }
+        ]
+    }
+]

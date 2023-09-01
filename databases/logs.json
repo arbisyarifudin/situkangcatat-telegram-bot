@@ -1,0 +1,43 @@
+[
+    {
+        "date": "2023-09-01",
+        "attendances": [
+            {
+                "message_id": 1,
+                "member_id": 1,
+                "status": "masuk",
+                "note": null,
+                "created_at": "2023-09-01 08:00:00",
+                "time": "08:00:00",
+                "timezone": "Asia/Jakarta"
+            },
+            {
+                "message_id": 1,
+                "member_id": 2,
+                "status": "masuk",
+                "note": "telat 5 menit",
+                "created_at": "2023-09-01 08:05:00",
+                "time": "08:05:00",
+                "timezone": "Asia/Jakarta"
+            }
+        ],
+        "daily_reports": [
+            {
+                "message_id": 1,
+                "member_id": 1,
+                "content": "Hari ini saya melakukan ini dan itu",
+                "created_at": "2023-09-01 08:00:00",
+                "time": "08:00:00",
+                "timezone": "Asia/Jakarta"
+            },
+            {
+                "message_id": 1,
+                "member_id": 2,
+                "content": "Hari ini saya melakukan ini dan itu",
+                "created_at": "2023-09-01 08:00:00",
+                "time": "08:00:00",
+                "timezone": "Asia/Jakarta"
+            }
+        ]
+    }
+]

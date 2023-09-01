@@ -1,7 +1,7 @@
 require('moment-timezone')
 const moment = require('moment')
 
-const { downloadPhoto, isValidReportFormat } = require('./helpers')
+const { downloadPhoto, isValidReportFormat, __handleCommand, listSupportedCommandText, invalidParamsText } = require('./helpers')
 const { saveToCSV } = require('./helpers')
 
 module.exports = {
@@ -93,7 +93,7 @@ module.exports = {
 
     // format pesan daily report:
     // eslint-disable-next-line no-unused-vars
-    const formatPesan = `Laporan Harian [TANGGAL/BULAN/TAHUN]
+    const formatPesan = `Laporan Harian [DD/MMM/YYYY]
 
 Nama: [Nama Anda]
 
@@ -161,6 +161,37 @@ Todo/Yang akan di kerjakan hari ini :
         // delete message
         // bot.deleteMessage(chatId, messageId)
       }
+    }
+  },
+  commandHandler: (bot, msg) => {
+    console.log('commandHandler msg', msg)
+
+    const chatId = msg.chat.id
+    const splitedText = msg.text.split(' ')
+    const command = splitedText[0] // Mengambil perintah (misal: /presensi)
+    const args = splitedText.length > 1 ? splitedText.slice(1) : [] // Mengambil argumen setelah perintah
+    const user = msg.from // Mengambil informasi pengirim pesan
+
+    // Mencari perintah yang sesuai
+    const supportedCommands = require('../../databases/commands.json')
+    const selectedCommand = supportedCommands.find((cmd) => cmd.command === command)
+
+    if (selectedCommand) {
+      // Memeriksa apakah jumlah argumen sesuai
+      if (args.length < selectedCommand.params.filter((param) => param.is_required).length) {
+        bot.sendMessage(
+          chatId, invalidParamsText(selectedCommand), {
+            parse_mode: 'MarkdownV2'
+          }
+        )
+      } else {
+        // Eksekusi perintah
+        __handleCommand(bot, selectedCommand, args, user, chatId)
+      }
+    } else {
+      bot.sendMessage(chatId, listSupportedCommandText(supportedCommands), {
+        parse_mode: 'MarkdownV2'
+      })
     }
   }
 }

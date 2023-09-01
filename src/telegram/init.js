@@ -1,7 +1,7 @@
 require('dotenv').config()
 
 const { allowedGroups } = require('../configs/telegramConfig')
-const { attendanceHandler, dailyReportHandler } = require('./handlers')
+const { attendanceHandler, dailyReportHandler, commandHandler } = require('./handlers')
 
 module.exports = {
   init: (bot) => {
@@ -10,27 +10,55 @@ module.exports = {
       //   console.log('message', msg)
 
       const chatId = msg.chat.id
-      const threadId = msg.message_thread_id
+      const topicId = msg.message_topic_id
+      const isBot = msg.from.is_bot
 
       // Cek apakah pesan masuk dari grup yang diizinkan
       const isAllowedGroup = allowedGroups.some(group => {
-        return group.id === chatId && group.topicIds.includes(threadId)
+        return group.id === chatId
       })
 
-      if (!isAllowedGroup) return
+      //   console.log('isAllowedGroup', isAllowedGroup)
 
-      // get event type based on allowedGroups
-      if (threadId) {
-        const allowedGroupData = allowedGroups.find(group => {
-          return group.id === chatId && group.topicIds.includes(threadId)
+      if (!isAllowedGroup) return
+      if (isBot) return
+
+      // get type type based on allowedGroups
+      if (topicId) {
+        const groupData = allowedGroups.find(group => {
+          return group.id === chatId && group.topics.some(topic => topic.id === topicId)
         })
 
-        if (allowedGroupData.event === 'attendance') {
+        // console.log('groupData', groupData)
+
+        if (!groupData) return
+
+        // get topic data
+        const topicData = groupData.topics.find(topic => topic.id === topicId)
+
+        // console.log('topicData', topicData)
+
+        if (!topicData) return
+
+        // handle type
+        if (topicData.type === 'attendance') {
           attendanceHandler(bot, msg)
-        } else if (allowedGroupData.event === 'daily_report') {
+        } else if (topicData.type === 'daily_report') {
           dailyReportHandler(bot, msg)
+        } else {
+          // check apakah pesan memiliki awalan "/" atau tidak, misal "/presensi" atau "/laporan-presensi"
+          if (msg.text && msg.text.startsWith('/')) {
+            console.log('text starts with "/"')
+            // commandHandler(bot, msg)
+          }
         }
       }
+    })
+
+    // Menangani pesan yang mengandung perintah
+    bot.onText(/\/\w+/, (msg) => {
+      console.log('receive text with "/"', msg.text)
+      commandHandler(bot, msg)
     })
   }
 }

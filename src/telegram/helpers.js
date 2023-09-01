@@ -6,9 +6,42 @@ const moment = require('moment')
 
 const headerTitles = ['Nama', 'Status', 'Pesan', 'Tanggal']
 
+// Helper: teks yang akan dikirimkan jika format pesan tidak sesuai
+// berisi daftar command dan parameter yang didukung serta penjelasan / description nya
+const listSupportedCommandText = (supportedCommands) => {
+  // output:
+  // **Perintah tidak valid**.
+  //
+  // **Daftar Perintah:**
+  // - `**/presensi** <jenis> <keterangan>` - Mencatat presensi
+  // - `**/laporan-presensi** <tahun> <bulan>` - Menampilkan laporan presensi
+
+  const text = `**Perintah tidak valid**.\n\n**Daftar Perintah:**\n${supportedCommands.map((command) => `- \`**${command.command}**\` ${command.description}`).join('\n')}`
+
+  return text
+}
+
+// Helper: teks yang akan dikirimkan jika jumlah parameter tidak sesuai
+// berisi daftar parameter yang didukung serta penjelasan / description nya
+const invalidParamsText = (command) => {
+  const commandName = command.command
+  // output:
+  // Perintah `/presensi` memerlukan lebih banyak parameter.
+  // Gunakan `/presensi <jenis> <keterangan>`.
+  //
+  // Berikut adalah daftar parameter yang didukung:
+  // - `<jenis>` : description
+  // - `<keterangan>` : description
+
+  const text = `Perintah \`/${commandName}\` memerlukan lebih banyak parameter.\nGunakan \`/${commandName} ${command.params.map((param) => `<${param.name}>`).join(' ')}\`.\n\nBerikut adalah daftar parameter yang didukung:\n${command.params.map((param) => `- \`<${param.name}>\` : ${param.description}`).join('\n')}`
+
+  return text
+}
+
 module.exports = {
+
   saveToCSV: (data, fileName, folder = 'datas') => {
-  // Membuat direktori jika belum ada
+    // Membuat direktori jika belum ada
     if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder, { recursive: true })
     }
@@ -142,6 +175,40 @@ module.exports = {
 
     // Jika semua kata kunci ditemukan, maka teks dianggap valid
     return true
-  }
+  },
+
+  // Helper: Fungsi untuk menangani perintah / command yang diterima
+  __handleCommand: (bot, command, args, user, chatId) => {
+    const commandName = command.command
+    const supportedCommands = require('../../databases/commands.json')
+
+    switch (commandName) {
+      case '/presensi':
+        // const jenis = args[0]
+        // const keterangan = args.slice(1).join(' ') // Menggabungkan argumen setelah jenis menjadi satu string
+        // Lakukan sesuatu dengan perintah presensi, misalnya catat di database
+        // Contoh respons:
+        // bot.sendMessage(chatId, `Presensi berhasil dicatat: Jenis: ${jenis}, Keterangan: ${keterangan}`)
+        break
+
+      case '/laporan-presensi':
+        // const tahun = args[0]
+        // const bulan = args[1]
+        // Lakukan sesuatu untuk menghasilkan laporan presensi berdasarkan tahun dan bulan
+        // Contoh respons:
+        // bot.sendMessage(chatId, `Menampilkan laporan presensi untuk tahun ${tahun} bulan ${bulan}`)
+        break
+
+      default:
+        // bot.sendMessage(chatId, 'Perintah tidak dikenali.')
+        bot.sendMessage(chatId, listSupportedCommandText(supportedCommands), {
+          parse_mode: 'MarkdownV2'
+        })
+        break
+    }
+  },
+
+  listSupportedCommandText,
+  invalidParamsText
 
 }

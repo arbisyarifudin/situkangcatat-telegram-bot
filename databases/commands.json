@@ -1,0 +1,54 @@
+[
+    {
+        "command": "/presensi",
+        "description": "Presensi kehadiran dengan format <code>/presensi <jenis> <keterangan></code>.\n Jenis: <code>masuk</code>, <code>keluar</code>, <code>izin</code>, <code>sakit</code>, <code>cuti</code>, <code>alpha</code>.\n Keterangan: <code>info tambahan, alasan dan semacamnya</code> (opsional).",
+        "params": [
+            {
+                "name": "jenis",
+                "type": "string",
+                "is_required": true,
+                "description": "Jenis presensi: masuk, keluar, izin, sakit, cuti, alpha"
+            },
+            {
+                "name": "keterangan",
+                "type": "string",
+                "is_required": false,
+                "description": "Keterangan presensi: info tambahan, alasan dan semacamnya"
+            }
+        ],
+        "example": "/presensi masuk",
+        "response": {
+            "success": "Presensi berhasil dicatat",
+            "error": "Presensi gagal dicatat"
+        },
+        "is_active": true,
+        "is_admin": false,
+        "is_bot": false
+    },
+    {
+        "command": "/laporan-presensi",
+        "description": "Melihat laporan presensi dengan format <code>/laporan-presensi <tahun> <bulan></code>.\n Tahun: <code>YYYY</code>.\n Bulan: <code>MM</code>.",
+        "params": [
+            {
+                "name": "tahun",
+                "type": "string",
+                "is_required": true,
+                "description": "Tahun: YYYY. Contoh: 2023"
+            },
+            {
+                "name": "bulan",
+                "type": "string",
+                "is_required": true,
+                "description": "Bulan: MM. Contoh: 01"
+            }
+        ],
+        "example": "/laporan-presensi 2023 01",
+        "response": {
+            "success": "Laporan presensi berhasil ditemukan",
+            "error": "Laporan presensi tidak ditemukan"
+        },
+        "is_active": true,
+        "is_admin": false,
+        "is_bot": false
+    }
+]
