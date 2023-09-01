@@ -13,12 +13,16 @@ Telegram bot untuk mencatat presensi kehadiran dan laporan harian (daily report)
 1. Clone repository ini
 2. Buka terminal dan masuk ke direktori repository
 3. Jalankan `yarn install` atau `npm install`
+4. Buat file `.env` dan isi dengan:
+```
+TELEGRAM_BOT_TOKEN=
+```
 
 ## Cara Jalankan
 1. Buka terminal dan masuk ke direktori repository
 2. Jalankan `yarn dev` atau `npm run dev` untuk menjalankan bot dalam mode development atau `yarn start` atau `npm run start` untuk menjalankan bot dalam mode production
 
-## Cara Buat Bot Telegram
+## Cara Buat Bot Telegram dan Mendapatkan Token
 1. Buka Telegram
 2. Cari bot dengan username `@botfather`
 3. Ketik `/newbot` dan ikuti petunjuknya
