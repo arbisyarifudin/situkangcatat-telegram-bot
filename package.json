@@ -9,7 +9,21 @@
     "start": "node src/app.js",
     "dev": "nodemon --ignore databases/ --exec node src/app.js"
   },
-  "author": "Arbi Syarifudin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arbisyarifudin/situkangcatat-telegram-bot.git"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "group bot",
+    "nodejs",
+    "javascript",
+    "express",
+    "attendance",
+    "daily report"
+  ],
+  "author": "arbisyarifudin",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.0.3",
