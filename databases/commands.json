@@ -1,16 +1,16 @@
 [
     {
         "command": "/presensi",
-        "description": "Presensi kehadiran dengan format <code>/presensi <jenis> <keterangan></code>.\n Jenis: <code>masuk</code>, <code>keluar</code>, <code>izin</code>, <code>sakit</code>, <code>cuti</code>, <code>alpha</code>.\n Keterangan: <code>info tambahan, alasan dan semacamnya</code> (opsional).",
+        "description": "Melakukan presensi kehadiran",
         "params": [
             {
-                "name": "jenis",
+                "name": "JENIS",
                 "type": "string",
                 "is_required": true,
                 "description": "Jenis presensi: masuk, keluar, izin, sakit, cuti, alpha"
             },
             {
-                "name": "keterangan",
+                "name": "KETERANGAN",
                 "type": "string",
                 "is_required": false,
                 "description": "Keterangan presensi: info tambahan, alasan dan semacamnya"
@@ -26,23 +26,23 @@
         "is_bot": false
     },
     {
-        "command": "/laporan-presensi",
-        "description": "Melihat laporan presensi dengan format <code>/laporan-presensi <tahun> <bulan></code>.\n Tahun: <code>YYYY</code>.\n Bulan: <code>MM</code>.",
+        "command": "/laporanpresensi",
+        "example": "/laporanpresensi 2023 01",
+        "description": "Melihat laporan presensi",
         "params": [
             {
-                "name": "tahun",
+                "name": "TAHUN",
                 "type": "string",
                 "is_required": true,
-                "description": "Tahun: YYYY. Contoh: 2023"
+                "description": "TAHUN: YYYY. Contoh: 2023"
             },
             {
-                "name": "bulan",
+                "name": "BULAN",
                 "type": "string",
                 "is_required": true,
-                "description": "Bulan: MM. Contoh: 01"
+                "description": "BULAN: MM. Contoh: 01"
             }
         ],
-        "example": "/laporan-presensi 2023 01",
         "response": {
             "success": "Laporan presensi berhasil ditemukan",
             "error": "Laporan presensi tidak ditemukan"

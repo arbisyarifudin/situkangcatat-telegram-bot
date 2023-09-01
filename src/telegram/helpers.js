@@ -10,32 +10,52 @@ const headerTitles = ['Nama', 'Status', 'Pesan', 'Tanggal']
 // berisi daftar command dan parameter yang didukung serta penjelasan / description nya
 const listSupportedCommandText = (supportedCommands) => {
   // output:
-  // **Perintah tidak valid**.
+  // **Perintah tidak valid.**
   //
   // **Daftar Perintah:**
-  // - `**/presensi** <jenis> <keterangan>` - Mencatat presensi
-  // - `**/laporan-presensi** <tahun> <bulan>` - Menampilkan laporan presensi
+  // - ``/presensi <jenis> <keterangan>`` - Mencatat presensi
+  // - ``/laporan-presensi <tahun> <bulan>`` - Menampilkan laporan presensi
 
-  const text = `**Perintah tidak valid**.\n\n**Daftar Perintah:**\n${supportedCommands.map((command) => `- \`**${command.command}**\` ${command.description}`).join('\n')}`
+  const text = `**Perintah tidak valid.**\n\n**Daftar Perintah:**\n${supportedCommands.map((command) => `- \`${command.command} ${command.params.map((param) => `<${param.name}>`).join(' ')}\` - ${command.description}`).join('\n')}`
 
-  return text
+  const escapedText = text
+    .replace(/\./g, '\\.')
+    .replace(/-/g, '\\-')
+    // .replace(/</g, '[')
+    // .replace(/>/g, ']')
+
+  //   console.log('listSupportedCommandText', escapedText)
+
+  return escapedText
 }
 
 // Helper: teks yang akan dikirimkan jika jumlah parameter tidak sesuai
 // berisi daftar parameter yang didukung serta penjelasan / description nya
 const invalidParamsText = (command) => {
-  const commandName = command.command
   // output:
-  // Perintah `/presensi` memerlukan lebih banyak parameter.
-  // Gunakan `/presensi <jenis> <keterangan>`.
+  // Perintah ``/presensi`` memerlukan lebih banyak parameter.
+  // Gunakan ``/presensi <jenis> <keterangan>``.
   //
   // Berikut adalah daftar parameter yang didukung:
-  // - `<jenis>` : description
-  // - `<keterangan>` : description
+  // - ``<jenis>`` : description
+  // - ``<keterangan>`` : description (tidak wajib)
 
-  const text = `Perintah \`/${commandName}\` memerlukan lebih banyak parameter.\nGunakan \`/${commandName} ${command.params.map((param) => `<${param.name}>`).join(' ')}\`.\n\nBerikut adalah daftar parameter yang didukung:\n${command.params.map((param) => `- \`<${param.name}>\` : ${param.description}`).join('\n')}`
+  const commandName = command.command // /presensi
+  const params = command.params //  [{ name: 'jenis', description: 'description', is_required: true }, { name: 'keterangan', description: 'description', is_required: false }]
 
-  return text
+  const text = `Perintah \`${commandName}\` memerlukan lebih banyak parameter.\nGunakan \`${commandName} ${params.map((param) => `<${param.name}>`).join(' ')}\`.\n\nBerikut adalah daftar parameter yang didukung:\n${params.map((param) => `- \`${param.name}\` : ${param.description} ${param.is_required ? '' : '(TIDAK WAJIB)'}`).join('\n')}`
+
+  const escapedText = text
+    .replace(/\./g, '\\.')
+    .replace(/-/g, '\\-')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)')
+  // .replace(/</g, '[')
+  // .replace(/>/g, ']')
+
+  //   console.log('invalidParamsText', escapedText)
+
+  return escapedText
 }
 
 module.exports = {
