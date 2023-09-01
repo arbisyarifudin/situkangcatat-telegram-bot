@@ -1,0 +1,17 @@
+{
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "editor.formatOnSave": false,
+    "editor.tabSize": 2,
+    "editor.codeActionsOnSave": [
+        "source.fixAll.eslint"
+    ],
+    "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+    "eslint.validate": [
+        "javascript",
+        "typescript",
+    ],
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features",
+    }
+}
