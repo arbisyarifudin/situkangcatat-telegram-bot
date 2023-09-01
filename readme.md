@@ -2,11 +2,11 @@
 Telegram bot untuk mencatat presensi kehadiran dan laporan harian (daily report) pada sebuah grup.
 
 ## Fitur
-- [x] Menampilkan command / perintah yang tersedia
-- [x] Mencatat presensi kehadiran
-- [x] Mencatat laporan harian
-- [] Menampilkan laporan tahunan (TODO)
-- [] Menampilkan laporan bulanan (TODO)
+- ✅ Menampilkan command / perintah yang tersedia
+- ✅ Mencatat presensi kehadiran
+- ✅ Mencatat laporan harian
+- 🕦 Menampilkan laporan tahunan (TODO)
+- 🕦 Menampilkan laporan bulanan (TODO)
 
 
 ## Cara Install
