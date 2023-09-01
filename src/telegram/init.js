@@ -1,25 +1,7 @@
 require('dotenv').config()
 
+const { allowedGroups } = require('../configs/telegramConfig')
 const { attendanceHandler, dailyReportHandler } = require('./handlers')
-
-// const eventTypes = [
-//   'attendance', // untuk handle masalah presensi
-//   'daily_report' // untuk handle masalah laporan harian
-// ]
-
-// ID grup yang diizinkan
-const allowedGroup = [
-  {
-    id: -1001812257489, // ID grup di Telegram (ganti dengan ID grup Anda)
-    topicIds: [23], // ID topik di grup (ganti dengan ID topik Anda)
-    event: 'attendance' // Jenis event untuk penanda fungsionalitas bot
-  },
-  {
-    id: -1001812257489,
-    topicIds: [107],
-    event: 'daily_report'
-  }
-]
 
 module.exports = {
   init: (bot) => {
@@ -31,15 +13,15 @@ module.exports = {
       const threadId = msg.message_thread_id
 
       // Cek apakah pesan masuk dari grup yang diizinkan
-      const isAllowedGroup = allowedGroup.some(group => {
+      const isAllowedGroup = allowedGroups.some(group => {
         return group.id === chatId && group.topicIds.includes(threadId)
       })
 
       if (!isAllowedGroup) return
 
-      // get event type based on allowedGroup
+      // get event type based on allowedGroups
       if (threadId) {
-        const allowedGroupData = allowedGroup.find(group => {
+        const allowedGroupData = allowedGroups.find(group => {
           return group.id === chatId && group.topicIds.includes(threadId)
         })
 
