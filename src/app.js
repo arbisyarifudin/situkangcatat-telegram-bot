@@ -4,9 +4,11 @@ const telegramConfig = require('./configs/telegramConfig')
 const corsMiddleware = require('./middlewares/corsMiddleware')
 const routes = require('./routes/index')
 const telegramBot = require('./telegram/init')
+const appConfig = require('./configs/appConfig')
 
 const app = express()
-const port = process.env.PORT || 3000
+const host = appConfig.host
+const port = appConfig.port
 
 app.use(express.json())
 app.use(corsMiddleware)
@@ -22,6 +24,7 @@ app.use('/', routes)
 const bot = new TelegramBot(telegramConfig.token, { polling: true })
 telegramBot.init(bot)
 
-app.listen(port, () => {
-  console.log(`Server berjalan di port ${port}`)
-})
+app.listen(port, host, () => {
+  console.log(`Server running at http://${host}:${port}/`)
+}
+)
