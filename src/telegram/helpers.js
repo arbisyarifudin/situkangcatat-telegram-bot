@@ -156,7 +156,12 @@ const getMemberData = (groupId = null, memberId = null) => {
     groups.forEach(group => {
       if (groupId.includes(group.id)) {
         const groupMembers = group.members || []
-        groupMembers.group_id = group.id
+
+        // tambah group_id ke dalam data tiap member
+        groupMembers.forEach(member => {
+          member.group_id = group.id
+        })
+
         members.push(...groupMembers)
       }
     })
@@ -168,9 +173,8 @@ const getMemberData = (groupId = null, memberId = null) => {
     members = group.members || []
 
     // tambah group_id ke dalam data tiap member
-    members = members.map(member => {
+    members.forEach(member => {
       member.group_id = group.id
-      return member
     })
   }
 

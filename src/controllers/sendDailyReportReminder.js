@@ -1,4 +1,4 @@
-// Path: src/controllers/sendAttendanceReminder.js
+// Path: src/controllers/sendDailyReportReminder.js
 const moment = require('moment')
 require('moment-timezone')
 // require('moment/locale/id')
@@ -10,7 +10,7 @@ const appConfig = require('../configs/appConfig')
 const { getLogDatabase, updateLogDatabase, getMemberData } = require('../telegram/helpers')
 
 module.exports = async (req, res) => {
-//   console.log('Sending attendance reminder...')
+//   console.log('Sending dailyReport reminder...')
 
   // get bot instance from req
   const bot = req.bot
@@ -28,8 +28,8 @@ module.exports = async (req, res) => {
     return res.status(401).json({ message: 'Unauthorized' })
   }
 
-  // ambil group dan topic yang memiliki type 'attendance'
-  const groups = allowedGroups.filter(group => group.topics.find(topic => topic.type === 'attendance'))
+  // ambil group dan topic yang memiliki type 'daily_report'
+  const groups = allowedGroups.filter(group => group.topics.find(topic => topic.type === 'daily_report'))
 
   // console.log('groups', groups)
 
@@ -49,8 +49,7 @@ module.exports = async (req, res) => {
   const currentDay = moment().format('dddd') // Nama hari dalam bahasa Indonesia
 
   //   const isTimeToSend = (currentHour === '07' && currentMinute === '55') || (currentHour === '15' && currentMinute === '55')
-  //   const isTimeToSend = true
-  const isTimeToSend = parseInt(currentHour) >= 7 && parseInt(currentHour) <= 16
+  const isTimeToSend = true
 
   if (!isTimeToSend) {
     // Jika bukan waktu yang ditentukan, maka kirim response API
@@ -62,79 +61,70 @@ module.exports = async (req, res) => {
     return res.json({ message: 'It\'s Sunday' })
   }
 
-  // cek apakah ada member yang belum presensi masuk atau pulang
+  // cek apakah ada member yang belum laporan harian
   const members = getMemberData(groupIds)
   //   console.log('members', members)
 
-  // attendance logs for today
-  const attendanceLogs = getLogDatabase(currentDate, 'attendances')
-  //   console.log('attendanceLogs', attendanceLogs)
+  // dailyReport logs for today
+  const dailyReportLogs = getLogDatabase(currentDate, 'daily_reports')
+  //   console.log('dailyReportLogs', dailyReportLogs)
 
   // get all member id
   const memberIds = members.map(member => member.id)
   //   console.log('memberIds', memberIds)
 
-  // get all attendance log for today
-  const attendanceLogsForToday = attendanceLogs.filter(log => memberIds.includes(log.member_id))
+  // get all dailyReport log for today
+  const dailyReportLogsForToday = dailyReportLogs.filter(log => memberIds.includes(log.member_id))
 
-  //   console.log('attendanceLogsForToday', attendanceLogsForToday)
+  //   console.log('dailyReportLogsForToday', dailyReportLogsForToday)
 
-  // get all member id that has attendance log for today
-  const memberIdsWithAttendanceLog = attendanceLogsForToday.map(log => log.member_id)
+  // get all member id that has dailyReport log for today
+  const memberIdsWithdailyReportLog = dailyReportLogsForToday.map(log => log.member_id)
 
-  //   console.log('memberIdsWithAttendanceLog', memberIdsWithAttendanceLog)
+  //   console.log('memberIdsWithdailyReportLog', memberIdsWithdailyReportLog)
 
-  // get all member id that has no attendance log for today
-  const memberIdsWithoutAttendanceLog = memberIds.filter(memberId => !memberIdsWithAttendanceLog.includes(memberId))
+  // get all member id that has no dailyReport log for today
+  const memberIdsWithoutdailyReportLog = memberIds.filter(memberId => !memberIdsWithdailyReportLog.includes(memberId))
 
-  //   console.log('memberIdsWithoutAttendanceLog', memberIdsWithoutAttendanceLog)
+  //   console.log('memberIdsWithoutdailyReportLog', memberIdsWithoutdailyReportLog)
 
-  if (memberIdsWithoutAttendanceLog.length === 0) {
-    // Jika semua member sudah presensi, maka kirim response API
-    return res.json({ message: 'All members have attendance log' })
+  if (memberIdsWithoutdailyReportLog.length === 0) {
+    // Jika semua member sudah laporan harian, maka kirim response API
+    return res.json({ message: 'All members have daily_report log' })
   }
 
-  // get reminder type (attendance_clockin or attendance_clockout)
-  const reminderType = `attendance${currentHour === '07' ? '_clockin' : currentHour === '15' ? '_clockout' : ''}`
+  // get reminder type
+  const reminderType = 'daily_report'
 
   // cek apakah sudah ada pengingat daily report di log untuk hari ini
   const isReminderSent = logReminders.find(reminder => reminder.type === reminderType)
 
-  // console.log('isReminderSent', isReminderSent)
+  //   console.log('isReminderSent', isReminderSent)
 
   if (isReminderSent) {
     // Jika sudah ada pengingat, maka kirim pesan ke pengguna
     return res.json({ message: 'Already sent before' })
   }
 
-  // jika belum ada pengingat, maka kirim pengingat ke grup dan topic yang memiliki type 'attendance'
+  // jika belum ada pengingat, maka kirim pengingat ke grup dan topic yang memiliki type 'daily_report'
 
-  // kirim pesan ke grup dan topic yang memiliki type 'attendance'
+  // kirim pesan ke grup dan topic yang memiliki type 'daily_report'
   groups.forEach(group => {
     const { id: groupId } = group
-    const topics = group.topics.filter(topic => topic.type === 'attendance')
+    const topics = group.topics.filter(topic => topic.type === 'daily_report')
     topics.forEach(topic => {
       const { id: topicId } = topic
 
-      let attendanceTypeLabel = ''
+      let messageText = 'Halo ges, jangan lupa laporan harian ya!'
 
-      // jika jam dibawah jam 8, maka kirim pesan untuk presensi masuk
-      // jika jam diatas jam 8 dan dibawah jam 16, maka kirim pesan untuk presensi pulang
-
-      if (currentHour === '07' || (parseInt(currentHour) > 7 && parseInt(currentHour) < 8)) {
-        attendanceTypeLabel = 'masuk'
-      } else if (currentHour === '15' || (parseInt(currentHour) > 15 && parseInt(currentHour) < 16)) {
-        attendanceTypeLabel = 'pulang'
-      }
-
-      let messageText = `Halo ges, jangan lupa presensi ${attendanceTypeLabel} ya!`
-
-      // cek apakah ada member yang belum presensi masuk atau pulang
-      if (memberIdsWithoutAttendanceLog.length > 0) {
+      // cek apakah ada member yang belum laporan harian
+      if (memberIdsWithoutdailyReportLog.length > 0) {
         // tambahkan nama member ke pesan
-        messageText += '\n\nMember yang belum presensi:'
+        messageText += '\n\nMember yang belum laporan harian:'
 
-        memberIdsWithoutAttendanceLog.forEach(memberId => {
+        console.log('groupId', groupId)
+
+        memberIdsWithoutdailyReportLog.forEach(memberId => {
           const findMember = members.find(member => member.id === memberId && member.group_id === groupId)
           if (!findMember) return
           const { first_name: firstName, last_name: lastName, username } = findMember
@@ -151,6 +141,7 @@ module.exports = async (req, res) => {
       })
 
       // tambahkan log pengingat ke log
+      // eslint-disable-next-line no-unreachable
       logReminders.push({
         type: reminderType,
         message_id: message.message_id,
