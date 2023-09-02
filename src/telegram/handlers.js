@@ -201,15 +201,19 @@ Todo/Yang akan dikerjakan hari ini :
 
         // cek apakah pesan sudah sesuai dengan format yang ditentukan, jika tidak maka bot akan mengirimkan pesan error
         if (!isValidReportFormat(msgText)) {
-          bot.sendMessage(chatId, `<b>Ups!</b> Format <b>Laporan Harian</b> salah.\n\nGunakan:\n\n<code>${formatPesan}</code>`, {
+          bot.sendMessage(chatId, `<b>Waduu!</b> Format <b>Laporan Harian</b> salah.\n\nGunakan:\n\n<code>${formatPesan}</code>`, {
             parse_mode: 'HTML',
             reply_to_message_id: messageId
           })
+
+          return
         }
+
         // delete message
         // bot.deleteMessage(chatId, messageId)
 
         // catat laporan ke database
+        // eslint-disable-next-line no-unreachable
         saveDailyReportToJSONFile(msg, {
           message_id: messageId,
           group_id: chatId,

@@ -420,7 +420,7 @@ module.exports = {
       },
       {
         keyword: 'yang sudah dikerjakan kemarin:',
-        alternatives: ['yang sudah dikerjakan', 'yang sudah dikerjakan kemarin', 'yang sudah dikerjakan kemarin:', 'yang sudah dikerjakan kemarin :', 'yang sudah dikerjakan :']
+        alternatives: ['yang sudah dikerjakan', 'yang sudah dikerjakan kemarin', 'yang sudah dikerjakan kemarin:', 'yang sudah dikerjakan kemarin :', 'yang sudah dikerjakan :', 'in progress:', 'in progress', 'in progress :']
       },
       {
         keyword: 'kendala (jika ada):',
@@ -428,7 +428,7 @@ module.exports = {
       },
       {
         keyword: 'todo/yang akan dikerjakan hari ini:',
-        alternatives: ['todo', 'todo :', 'yang akan dikerjakan', 'yang akan dikerjakan hari ini', 'yang akan dikerjakan hari ini:', 'yang akan dikerjakan hari ini :', 'yang akan dikerjakan :', 'yang akan di kerjakan hari ini', 'yang akan di kerjakan hari ini:', 'yang akan di kerjakan hari ini :', 'yang akan di kerjakan :']
+        alternatives: ['todo', 'todo :', 'todo:', 'yang akan dikerjakan', 'yang akan dikerjakan hari ini', 'yang akan dikerjakan hari ini:', 'yang akan dikerjakan hari ini :', 'yang akan dikerjakan :']
       }
     ]
 
@@ -439,25 +439,20 @@ module.exports = {
 
     for (const keyword of keywords) {
     //   console.log(keyword, lowercaseText.includes(keyword))
-      if (!lowercaseText.includes(keyword)) {
-        // Cek apakah kata kunci memiliki alternatif
-        const keywordAlternative = keywordsAlternative.find(keywordAlternative => keywordAlternative.keyword)
-        if (keywordAlternative) {
-          // Cek apakah salah satu alternatif kata kunci ditemukan
-          const isAlternativeFound = keywordAlternative.alternatives.some(alternative => lowercaseText.includes(alternative))
-          //   console.log('isAlternativeFound', isAlternativeFound)
-          if (!isAlternativeFound) {
-            return false
-          }
-
-          // Jika salah satu alternatif kata kunci ditemukan, maka tambahkan 1 ke dalam passedCount
-          passedCount++
-        } else {
-          return false
-        }
-      } else {
-        // Jika kata kunci ditemukan, maka tambahkan 1 ke dalam passedCount
+      if (lowercaseText.includes(keyword)) {
         passedCount++
+      } else if (!lowercaseText.includes(keyword)) {
+        // Cek apakah kata kunci memiliki alternatif
+        const keywordAlternative = keywordsAlternative.find(keywordAlternative => keywordAlternative.keyword === keyword)
+        if (keywordAlternative) {
+          // console.log('keywordAlternative', keywordAlternative)
+          // Cek apakah salah satu alternatif kata kunci ditemukan di dalam lowercaseText
+          const alternativeFound = keywordAlternative.alternatives.find(alternative => lowercaseText.includes(alternative))
+          //   console.log('alternativeFound', alternativeFound)
+          if (alternativeFound) {
+            passedCount++
+          }
+        }
       }
     }
 

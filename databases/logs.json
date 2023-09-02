@@ -156,6 +156,17 @@
         "timezone": "Asia/Jakarta"
       }
     ],
-    "daily_reports": []
+    "daily_reports": [
+      {
+        "message_id": 497,
+        "group_id": -1001812257489,
+        "member_id": 1398045704,
+        "content": "Laporan Harian 02/09/2023\n\nNama: Andika\n\nYang sudah di kerjakan kemarin:\n- Mengerjakan fitur pilihan kategori di post\n\nKendala (jika ada) :\n- -\n\n\nTodo/Yang akan di kerjakan hari ini :\n- Lanjut mengerjakan fitur pilihan kategori di post",
+        "created_at": "2023-09-02 12:20:01",
+        "time": "12:20:01",
+        "timezone": "Asia/Jakarta",
+        "day_name": "Sabtu"
+      }
+    ]
   }
 ]
