@@ -98,17 +98,28 @@ module.exports = async (req, res) => {
 
   // cek apakah sudah ada pengingat daily report di log untuk hari ini
   const isReminderSent = logReminders.find(reminder => reminder.type === reminderType)
-
   //   console.log('isReminderSent', isReminderSent)
+  //   if (isReminderSent) {
+  //     // Jika sudah ada pengingat, maka kirim pesan ke pengguna
+  //     return res.json({ message: 'Already sent before' })
+  //   }
 
   if (isReminderSent) {
-    // Jika sudah ada pengingat, maka kirim pesan ke pengguna
-    return res.json({ message: 'Already sent before' })
+    // Cek apakah reminder sudah di kirim dalam 2 jam lalu?
+    // jika masih dalam 2 jam, maka jangan kirim pengingat
+    const isReminderSentInLast2Hours = moment().diff(moment(isReminderSent.created_at), 'hours') < 2
+
+    if (isReminderSentInLast2Hours) {
+      return res.json({ message: 'Already sent before' })
+    }
   }
+
+  return res.json({ message: 'Already sent before' })
 
   // jika belum ada pengingat, maka kirim pengingat ke grup dan topic yang memiliki type 'daily_report'
 
   // kirim pesan ke grup dan topic yang memiliki type 'daily_report'
+  // eslint-disable-next-line no-unreachable
   groups.forEach(group => {
     const { id: groupId } = group
     const topics = group.topics.filter(topic => topic.type === 'daily_report')
