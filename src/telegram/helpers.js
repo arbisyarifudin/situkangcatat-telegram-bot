@@ -55,10 +55,25 @@ const saveAttendanceToJSONFile = (msg, { status, note }) => {
     log = logs.find(log => log.date === currentDate)
   }
 
-  const logAttendances = log.attendances
+  //   const logAttendances = log.attendances
+
+  //   // tambahkan data presensi ke dalam log
+  //   logAttendances.push({
+  //     message_id: msg.message_id,
+  //     member_id: msg.from.id,
+  //     status: status.toLowerCase(),
+  //     note,
+  //     created_at: dateTimeString,
+  //     time: date.format('HH:mm:ss'),
+  //     timezone: 'Asia/Jakarta'
+  //   })
+
+  if (!log.attendances) {
+    log.attendances = []
+  }
 
   // tambahkan data presensi ke dalam log
-  logAttendances.push({
+  log.attendances.push({
     message_id: msg.message_id,
     member_id: msg.from.id,
     status: status.toLowerCase(),
@@ -67,6 +82,53 @@ const saveAttendanceToJSONFile = (msg, { status, note }) => {
     time: date.format('HH:mm:ss'),
     timezone: 'Asia/Jakarta'
   })
+
+  // update logs dengan log yang sudah diupdate
+  logs[logs.findIndex(log => log.date === currentDate)] = log
+
+  // Simpan log ke dalam database/logs.json
+
+  // Membuat direktori jika belum ada
+  if (!fs.existsSync('databases')) {
+    fs.mkdirSync('databases', { recursive: true })
+  }
+
+  fs.writeFileSync('databases/logs.json', JSON.stringify(logs, null, 2), 'utf-8')
+}
+
+const saveDailyReportToJSONFile = (msg, data) => {
+  // current date (format: YYYY-MM-DD)
+  const date = moment().tz('Asia/Jakarta')
+  const currentDate = date.format('YYYY-MM-DD')
+
+  // Ambil semua data logs
+  const logs = require('../../databases/logs.json')
+
+  //   console.log('logs', logs)
+
+  // temukan log yang sesuai dengan tanggal
+  let log = logs.find(log => log.date === currentDate)
+  if (!log) {
+    // Jika log tidak ditemukan, maka buat log baru
+    logs.push({
+      date: currentDate,
+      daily_reports: []
+    })
+
+    // temukan log yang sesuai dengan tanggal
+    log = logs.find(log => log.date === currentDate)
+  }
+
+  if (!log.daily_reports) {
+    // Jika log tidak ditemukan, maka buat log baru
+    log.daily_reports = []
+  }
+
+  // tambahkan data presensi ke dalam log
+  log.daily_reports.push({ ...data })
+
+  // update logs dengan log yang sudah diupdate
+  logs[logs.findIndex(log => log.date === currentDate)] = log
 
   // Simpan log ke dalam database/logs.json
 
@@ -269,6 +331,7 @@ module.exports = {
 
   saveToCSV,
   saveAttendanceToJSONFile,
+  saveDailyReportToJSONFile,
   getLogDatabase,
   updateLogDatabase,
   getMemberData,
@@ -353,7 +416,7 @@ module.exports = {
       },
       {
         keyword: 'nama:',
-        alternatives: ['nama', 'name:', 'name']
+        alternatives: ['nama', 'nama :', 'name:', 'name']
       },
       {
         keyword: 'yang sudah dikerjakan kemarin:',
@@ -369,24 +432,40 @@ module.exports = {
       }
     ]
 
+    // console.log('=====')
+    // console.log('lowercaseText', lowercaseText)
+
+    let passedCount = 0
+
     for (const keyword of keywords) {
+    //   console.log(keyword, lowercaseText.includes(keyword))
       if (!lowercaseText.includes(keyword)) {
         // Cek apakah kata kunci memiliki alternatif
-        const keywordAlternative = keywordsAlternative.find(keywordAlternative => keywordAlternative.keyword === keyword)
+        const keywordAlternative = keywordsAlternative.find(keywordAlternative => keywordAlternative.keyword)
         if (keywordAlternative) {
           // Cek apakah salah satu alternatif kata kunci ditemukan
           const isAlternativeFound = keywordAlternative.alternatives.some(alternative => lowercaseText.includes(alternative))
+          //   console.log('isAlternativeFound', isAlternativeFound)
           if (!isAlternativeFound) {
             return false
           }
+
+          // Jika salah satu alternatif kata kunci ditemukan, maka tambahkan 1 ke dalam passedCount
+          passedCount++
         } else {
           return false
         }
+      } else {
+        // Jika kata kunci ditemukan, maka tambahkan 1 ke dalam passedCount
+        passedCount++
       }
     }
 
+    // console.log('passedCount', passedCount)
+    // console.log('=====')
+
     // Jika semua kata kunci ditemukan, maka teks dianggap valid
-    return true
+    return passedCount === keywords.length
   },
 
   // Helper: Fungsi untuk menangani perintah / command yang diterima

@@ -4,7 +4,7 @@ require('moment-timezone')
 require('moment/locale/id')
 moment.locale('id')
 
-const { downloadPhoto, isValidReportFormat, __handleCommand, listSupportedCommandText, invalidParamsText, saveAttendanceToJSONFile } = require('./helpers')
+const { downloadPhoto, isValidReportFormat, __handleCommand, listSupportedCommandText, invalidParamsText, saveAttendanceToJSONFile, saveDailyReportToJSONFile } = require('./helpers')
 const { saveToCSV } = require('./helpers')
 const supportedCommands = require('../../databases/commands.json')
 
@@ -140,11 +140,11 @@ module.exports = {
 
     // format pesan daily report:
     // eslint-disable-next-line no-unused-vars
-    const formatPesan = `Laporan Harian [DD/MMM/YYYY]
+    const formatPesan = `Laporan Harian [DD/MMM/YYYY] (misal: 01/Jan/2021)
 
-Nama: [Nama Anda]
+Nama: [Nama Anda] (misal: John Doe)
 
-Yang sudah di kerjakan kemarin:
+Yang sudah dikerjakan kemarin :
 - [Tugas 1]
 - [Tugas 2]
 - dst...
@@ -154,7 +154,7 @@ Kendala (jika ada) :
 - [Kendala 2]
 - dst...
 
-Todo/Yang akan di kerjakan hari ini :
+Todo/Yang akan dikerjakan hari ini :
 - [Tugas 1]
 - [Tugas 2]
 - dst...`
@@ -197,6 +197,8 @@ Todo/Yang akan di kerjakan hari ini :
           return
         }
 
+        // console.log('isValidReportFormat', isValidReportFormat(msgText))
+
         // cek apakah pesan sudah sesuai dengan format yang ditentukan, jika tidak maka bot akan mengirimkan pesan error
         if (!isValidReportFormat(msgText)) {
           bot.sendMessage(chatId, `<b>Ups!</b> Format <b>Laporan Harian</b> salah.\n\nGunakan:\n\n<code>${formatPesan}</code>`, {
@@ -204,9 +206,31 @@ Todo/Yang akan di kerjakan hari ini :
             reply_to_message_id: messageId
           })
         }
-
         // delete message
         // bot.deleteMessage(chatId, messageId)
+
+        // catat laporan ke database
+        saveDailyReportToJSONFile(msg, {
+          message_id: messageId,
+          group_id: chatId,
+          member_id: msg.from.id,
+          content: msgText,
+          created_at: date.format('YYYY-MM-DD HH:mm:ss'),
+          time: date.format('HH:mm:ss'),
+          timezone: 'Asia/Jakarta',
+          day_name: dayName
+        })
+
+        const memberName = msg.from.first_name ? msg.from.first_name : ('@' + msg.from.username)
+
+        // Format pesan sukses
+        const successMessageText = `<b>Sip!</b> Terima kasih atas laporannya, ${memberName}!`
+
+        // Kirim pesan sukses
+        bot.sendMessage(chatId, successMessageText, {
+          parse_mode: 'HTML',
+          reply_to_message_id: messageId
+        })
       }
     }
   },
