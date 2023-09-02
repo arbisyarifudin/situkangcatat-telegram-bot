@@ -19,51 +19,6 @@
         "created_at": "2023-09-01 08:05:00",
         "time": "08:05:00",
         "timezone": "Asia/Jakarta"
-      },
-      {
-        "message_id": 394,
-        "member_id": 208432445,
-        "status": "tidak diketahui",
-        "note": "",
-        "created_at": "2023-09-01 23:56:15",
-        "time": "23:56:15",
-        "timezone": "Asia/Jakarta"
-      },
-      {
-        "message_id": 394,
-        "member_id": 208432445,
-        "status": "tidak diketahui",
-        "note": "",
-        "created_at": "2023-09-01 23:56:16",
-        "time": "23:56:16",
-        "timezone": "Asia/Jakarta"
-      },
-      {
-        "message_id": 394,
-        "member_id": 208432445,
-        "status": "tidak diketahui",
-        "note": "",
-        "created_at": "2023-09-01 23:56:18",
-        "time": "23:56:18",
-        "timezone": "Asia/Jakarta"
-      },
-      {
-        "message_id": 394,
-        "member_id": 208432445,
-        "status": "tidak diketahui",
-        "note": "",
-        "created_at": "2023-09-01 23:56:19",
-        "time": "23:56:19",
-        "timezone": "Asia/Jakarta"
-      },
-      {
-        "message_id": 394,
-        "member_id": 208432445,
-        "status": "tidak diketahui",
-        "note": "",
-        "created_at": "2023-09-01 23:58:11",
-        "time": "23:58:11",
-        "timezone": "Asia/Jakarta"
       }
     ],
     "daily_reports": [
@@ -81,6 +36,94 @@
         "content": "Hari ini saya melakukan ini dan itu",
         "created_at": "2023-09-01 08:00:00",
         "time": "08:00:00",
+        "timezone": "Asia/Jakarta"
+      }
+    ],
+    "reminders": [
+      {
+        "type": "general",
+        "message_id": 1,
+        "group_id": 1,
+        "for_member_id": null,
+        "content": "Jangan lupa meeting jam 10",
+        "created_at": "2023-09-01 08:00:00",
+        "time": "08:00:00",
+        "timezone": "Asia/Jakarta"
+      },
+      {
+        "type": "daily_report",
+        "message_id": 1,
+        "group_id": 2,
+        "for_member_id": null,
+        "content": "Jangan lupa daily report ya",
+        "created_at": "2023-09-01 08:05:00",
+        "time": "08:00:00",
+        "timezone": "Asia/Jakarta"
+      },
+      {
+        "type": "daily_report_personal",
+        "message_id": 1,
+        "group_id": 2,
+        "for_member_id": 1,
+        "content": "@user jangan lupa daily report ya",
+        "created_at": "2023-09-01 08:05:00",
+        "time": "08:00:00",
+        "timezone": "Asia/Jakarta"
+      },
+      {
+        "type": "attendance",
+        "message_id": 1,
+        "group_id": 2,
+        "for_member_id": null,
+        "content": "Jangan lupa presensi ya",
+        "created_at": "2023-09-01 08:05:00",
+        "time": "08:00:00",
+        "timezone": "Asia/Jakarta"
+      },
+      {
+        "type": "attendance_clockin",
+        "message_id": 1,
+        "group_id": 2,
+        "for_member_id": null,
+        "content": "Sudah mau jam 8. Jangan lupa presensi masuk ya",
+        "created_at": "2023-09-01 08:05:00",
+        "time": "08:00:00",
+        "timezone": "Asia/Jakarta"
+      },
+      {
+        "type": "attendance_clockout",
+        "message_id": 1,
+        "group_id": 2,
+        "for_member_id": null,
+        "content": "Terima kasih atas kerja kerasnya! Jangan lupa presensi pulang ya",
+        "created_at": "2023-09-01 08:05:00",
+        "time": "08:00:00",
+        "timezone": "Asia/Jakarta"
+      }
+    ]
+  },
+  {
+    "date": "2023-09-02",
+    "attendances": [
+      {
+        "message_id": 443,
+        "member_id": 1398045704,
+        "status": "masuk",
+        "note": "",
+        "created_at": "2023-09-02 08:27:13",
+        "time": "08:27:13",
+        "timezone": "Asia/Jakarta"
+      }
+    ],
+    "reminders": [
+      {
+        "type": "attendance",
+        "group_id": -1001812257489,
+        "for_member_id": null,
+        "topic_id": 23,
+        "content": "Halo ges, jangan lupa presensi  ya!\n\nMember yang belum presensi:\n- Arbi Syarifudin (@arbisyarifudin)",
+        "created_at": "2023-09-02 10:34:26",
+        "time": "10:34:26",
         "timezone": "Asia/Jakarta"
       }
     ]

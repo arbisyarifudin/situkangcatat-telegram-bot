@@ -1,7 +1,10 @@
 const moment = require('moment')
 require('moment-timezone')
+// require('moment/locale/id')
+require('moment/locale/id')
+moment.locale('id')
 
-const { downloadPhoto, isValidReportFormat, __handleCommand, listSupportedCommandText, invalidParamsText } = require('./helpers')
+const { downloadPhoto, isValidReportFormat, __handleCommand, listSupportedCommandText, invalidParamsText, saveAttendanceToJSONFile } = require('./helpers')
 const { saveToCSV } = require('./helpers')
 const supportedCommands = require('../../databases/commands.json')
 
@@ -60,6 +63,13 @@ module.exports = {
             const dateFileName = date.format('YYYY-MM-DD') // format: YYYY-MM-DD
             saveToCSV([rowData], `datas/attendance-${dateFileName}.csv`)
 
+            // Simpan ke dalam database/logs.json
+            saveAttendanceToJSONFile(msg, {
+              status,
+              note
+            })
+
+            // Format pesan sukses
             const successMessageText = `<b>Sip!</b> Kehadiran berhasil dicatat.\n\n<code>Username: ${username}\nStatus: ${status}\nTimestamp: ${dayName}, ${dateTimeString} WIB</code>`
 
             // Kirim pesan sukses

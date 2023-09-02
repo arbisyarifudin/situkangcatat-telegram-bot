@@ -3,6 +3,9 @@ const https = require('https')
 
 const moment = require('moment')
 require('moment-timezone')
+// require('moment/dist/locale/id')
+require('moment/locale/id')
+moment.locale('id')
 
 const headerTitles = ['Nama', 'Status', 'Keterangan', 'Tanggal', 'Pesan']
 
@@ -127,7 +130,144 @@ const invalidParamsText = (command) => {
   return escapedText
 }
 
+const getMemberData = (groupId = null, memberId = null) => {
+  // Ambil semua data groups
+  const groups = require('../../databases/groups.json')
+
+  if (!groupId) {
+    // Jika tidak ada groupId, maka kembalikan semua data member dari semua group
+    const members = []
+
+    // Ambil semua data members dari semua group
+    groups.forEach(group => {
+      const groupMembers = group.members || []
+      groupMembers.group_id = group.id
+      members.push(...groupMembers)
+    })
+
+    return members
+  }
+
+  let members = []
+
+  // cek if groupId is array
+  if (Array.isArray(groupId)) {
+    // Ambil semua data members dari semua group
+    groups.forEach(group => {
+      if (groupId.includes(group.id)) {
+        const groupMembers = group.members || []
+        groupMembers.group_id = group.id
+        members.push(...groupMembers)
+      }
+    })
+  } else {
+    // temukan group yang sesuai dengan id
+    const group = groups.find(group => group.id === groupId)
+
+    // Ambil semua data members dari group
+    members = group.members || []
+
+    // tambah group_id ke dalam data tiap member
+    members = members.map(member => {
+      member.group_id = group.id
+      return member
+    })
+  }
+
+  if (!memberId) {
+    // Jika tidak ada memberId, maka kembalikan semua data member dari group
+    return members
+  }
+
+  // temukan member yang sesuai dengan id
+  const member = members.find(member => member.id === memberId)
+
+  return member
+}
+
+const getLogDatabase = (date = null, type = null) => {
+  // Ambil semua data logs
+  const logs = require('../../databases/logs.json')
+
+  if (!date) {
+    return logs
+  }
+
+  // temukan log yang sesuai dengan tanggal
+  let log = logs.find(log => log.date === date)
+
+  if (!log) {
+    // Jika log tidak ditemukan, maka buat log baru
+    logs.push({
+      date,
+      reminders: [],
+      attendances: [],
+      daily_reports: []
+    })
+
+    // temukan log yang sesuai dengan tanggal
+    log = logs.find(log => log.date === date)
+  }
+
+  if (!type) {
+    return log
+  }
+
+  let logData = log[type]
+
+  if (!logData) {
+    // Jika log tidak ditemukan, maka buat log baru
+    log[type] = []
+    logData = log[type]
+  }
+
+  return logData
+}
+
+const updateLogDatabase = (date, type = 'attendance', data) => {
+  // Ambil semua data logs
+  const logs = require('../../databases/logs.json')
+
+  // temukan log yang sesuai dengan tanggal
+  let log = logs.find(log => log.date === date)
+
+  if (!log) {
+    // Jika log tidak ditemukan, maka buat log baru
+    logs.push({
+      date,
+      reminders: [],
+      attendances: [],
+      daily_reports: []
+    })
+
+    // temukan log yang sesuai dengan tanggal
+    log = logs.find(log => log.date === date)
+  }
+
+  log[type] = data
+
+  // update logs dengan log yang sudah diupdate
+  logs[logs.findIndex(log => log.date === date)] = log
+
+  // Simpan log ke dalam database/logs.json
+
+  // Membuat direktori jika belum ada
+  if (!fs.existsSync('databases')) {
+    fs.mkdirSync('databases', { recursive: true })
+  }
+
+  fs.writeFileSync('databases/logs.json', JSON.stringify(logs, null, 2), 'utf-8')
+
+  return log
+}
+
 module.exports = {
+
+  saveToCSV,
+  saveAttendanceToJSONFile,
+  getLogDatabase,
+  updateLogDatabase,
+  getMemberData,
 
   // Fungsi untuk mengunduh foto dari pesan
   downloadPhoto: (bot, fileId) => {
