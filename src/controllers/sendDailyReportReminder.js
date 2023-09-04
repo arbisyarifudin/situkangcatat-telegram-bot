@@ -114,7 +114,7 @@ module.exports = async (req, res) => {
     }
   }
 
-  return res.json({ message: 'Already sent before' })
+  //   return res.json({ message: 'Already sent before' })
 
   // jika belum ada pengingat, maka kirim pengingat ke grup dan topic yang memiliki type 'daily_report'
 
